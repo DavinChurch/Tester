@@ -1,4 +1,4 @@
- rpt←{left}(testfn Pass_ expect)right;at;result;validate;⎕TRAP;nrr;failure;⎕IO;IO;⎕ML
+ rpt←{left}(testfn Pass_ expect)right;at;result;validate;⎕TRAP;nrr;failure;⎕IO;IO;⎕ML;ML
  ⍝ Perform a unit-test on a simple function call that takes arguments and is expected to NOT return a result.
  ⍝ Execute <testfn> with arguments {left} and <right> and expect no result to be returned.
  ⍝ <expect> should be a function (passed ⍬ as any arguments) that validates
@@ -11,7 +11,7 @@
  ⍝ See also ∇Pass to run tests that return result values to be verified.
  ⍝ and ∇Fail to test production of ⎕SIGNAL error reports.
 
- IO←⎕IO ⋄ ⎕IO←⎕ML←1 ⋄ rpt←0 0⍴'' ⋄ at←⊃⎕AT'testfn' ⋄ nrr←at[1]=0
+ IO←⎕IO ⋄ ML←⎕ML ⋄ ⎕IO←⎕ML←1 ⋄ rpt←0 0⍴'' ⋄ at←⊃⎕AT'testfn' ⋄ nrr←at[1]=0
  'Test-fn is niladic'⎕SIGNAL 2/⍨at[2]=0
  'Test-fn is monadic'⎕SIGNAL 2/⍨(at[2]=1)∧0≠⎕NC'left'
  'Test-fn is dyadic'⎕SIGNAL 2/⍨(at[2]=2)∧0=⎕NC'left'
@@ -21,9 +21,9 @@
      at←⊃⎕AT'expect'
      'Validation-fn does not return a result'⎕SIGNAL 2/⍨at[1]=0
      :Select at[2]
-     :Case 0 ⋄ validate←{⎕IO←IO ⋄ expect}
-     :Case 1 ⋄ validate←{⎕IO←IO ⋄ expect ⍵}
-     :CaseList 2 ¯2 ⋄ validate←{⎕IO←IO ⋄ ⍺ expect ⍵}
+     :Case 0 ⋄ validate←{⎕IO←IO ⋄ ⎕ML←ML ⋄ expect}
+     :Case 1 ⋄ validate←{⎕IO←IO ⋄ ⎕ML←ML ⋄ expect ⍵}
+     :CaseList 2 ¯2 ⋄ validate←{⎕IO←IO ⋄ ⎕ML←ML ⋄ ⍺ expect ⍵}
      :EndSelect
  :Else
      'Validation operand is not a fn'⎕SIGNAL 2
@@ -32,20 +32,20 @@
  failure←0 ⋄ ⎕TRAP←0 'E' '(1↓∊(⎕UCS 13),[⎕IO+.5]⎕DM)⎕SIGNAL(''Pass_''≢⊃⎕SI)/⎕EN ⋄ failure←1 ⋄ →⎕LC+1'
  :If 2=⎕NC'StopOnError' ⋄ :AndIf 2∊StopOnError ⋄ ⎕TRAP←0/⎕TRAP ⋄ :EndIf
  :If nrr
-     ⎕IO←IO ⋄ left testfn right
+     ⎕IO←IO ⋄ ⎕ML←ML ⋄ left testfn right
      result←⍬ ⍝ This cannot return a result
  :Else
-     ⎕IO←IO ⋄ result←left testfn right
+     ⎕IO←IO ⋄ ⎕ML←ML ⋄ result←left testfn right
      :If ~failure
          rpt←'Test-fn produced a result:',(⎕UCS 13),⎕SE.UCMD'Disp result'
      :EndIf
  :EndIf
- ⎕IO←1 ⋄ ⎕TRAP←0/⎕TRAP
+ ⎕IO←⎕ML←1 ⋄ ⎕TRAP←0/⎕TRAP
 
  :If failure∧(⎕EN=6)∧(~(⎕UCS 13)∊⊃⎕DM)∧∨/'left testfn right'⍷⊃1↓⎕DM
      result←⍬ ⍝ This is the expected case (a returned VALUE ERROR)
  :ElseIf failure
-     rpt←1↓∊(⎕UCS 13),[⎕IO+0.5]⎕DM
+     rpt←1↓∊(⎕UCS 13),[1.5]⎕DM
  :EndIf
 
  :If 0∊⍴rpt
@@ -54,7 +54,7 @@
              rpt←'Test-fn failed validation'
          :EndIf
      :Else
-         rpt←'Validation processing function failed to complete!',∊(⎕UCS 13),[⎕IO+0.5]⎕DM
+         rpt←'Validation processing function failed to complete!',∊(⎕UCS 13),[1.5]⎕DM
      :EndTrap
  :EndIf
 
