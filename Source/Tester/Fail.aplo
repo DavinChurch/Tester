@@ -1,4 +1,4 @@
- rpt←{left}(testfn Fail expect)right;at;result;validate;⎕TRAP;nrr;failure;⎕IO;IO
+ rpt←{left}(testfn Fail expect)right;at;result;validate;⎕TRAP;nrr;failure;⎕IO;IO;⎕ML
  ⍝ Perform a unit-test on a simple function call that takes arguments and returns a result.
  ⍝ Execute <testfn> with arguments {left} and <right> and expect it to ⎕SIGNAL an error
  ⍝ where ⎕EN∊<expect> (if numeric) or <expect>≡⊃⎕DM (if character).
@@ -13,7 +13,7 @@
  ⍝  ¯1←Do not stop, and increment global variable "Errors" if it exists
  ⍝ See also ∇Pass/∇Pass_ to run tests that do not signal errors.
 
- IO←⎕IO ⋄ ⎕IO←1 ⋄ rpt←0 0⍴'' ⋄ at←⊃⎕AT'testfn' ⋄ nrr←at[1]=0
+ IO←⎕IO ⋄ ⎕IO←⎕ML←1 ⋄ rpt←0 0⍴'' ⋄ at←⊃⎕AT'testfn' ⋄ nrr←at[1]=0
  'Test-fn is niladic'⎕SIGNAL 2/⍨at[2]=0
  'Test-fn is monadic'⎕SIGNAL 2/⍨(at[2]=1)∧0≠⎕NC'left'
  'Test-fn is dyadic'⎕SIGNAL 2/⍨(at[2]=2)∧0=⎕NC'left'
