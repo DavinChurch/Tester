@@ -4,6 +4,8 @@ This is a small set of utility programs to assist with function-level testing of
 
 If multiple functions are to be used to perform testing, the included `Test` cover function may be used to call them all in sequence.  It is invoked with a list of function names (in almost any reasonable structure and format) as a right argument, the matching function names in the namespace will be executed.  These names may include an `*` wild-card character, so `Test '*'` will execute all the functions in the workspace.  An optional left argument may be specified to temporarily override the global `StopOnError` setting _(see below)_.  `Test` will return a completion message unless errors are being counted, in which case it will return that count.
 
+This is a member of the [APLTree project](https://github.com/aplteam/apltree) and is also available via the [Tatin package manager](https://github.com/aplteam/Tatin).
+
 ## Testing engine
 
 The testing engine consists of three independent, stand-alone APL operators.  These may be used individually for simple argument/result testing anywhere.  The left operand of each operator is the function to be tested.  The right operand is the expected result.  The derived function uses the provided left and right arguments and passes them directly to the function being tested.  The three routines are:
