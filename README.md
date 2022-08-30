@@ -13,7 +13,7 @@ The testing engine consists of three independent, stand-alone APL operators.  Th
 Tester | Used to...
 ------ | ----------
 `Pass` | Make sure the tested function returns the expected result, which is provided as the right operand value _(if a value is specified)_.  Alternatively a boolean function may be specified as the right operand which will be called monadically with the result to verify that the result is correct.
-`Pass_` | Make sure the tested function does NOT return an explicit result in this case.  The right operand must be a boolean function to determine if the tested function produced proper side-effects, or `{1}` or `1⍨` is sufficient if no explicit verification is to be performed.
+`Pass_` | Make sure the tested function does NOT return an explicit result in this case.  The right operand must be a boolean function to determine if the tested function produced proper side-effects, or `{1}` or `(1⍨)` is sufficient if no explicit verification is to be performed.
 `Fail` | Make sure the tested function exits with a `⎕SIGNAL` as validated by the right operand.  The right operand may be text to match `⎕DM`, a numeric (array) for `⎕EN` to be a member of, or a boolean function (provided up to both of these values) to validate that the failure was as expected.
 
 ### Error handling during testing
