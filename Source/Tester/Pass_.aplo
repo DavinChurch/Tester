@@ -50,7 +50,7 @@
  :Else
      ⎕IO←IO ⋄ ⎕ML←ML ⋄ result←left testfn right
      :If ~failure
-         rpt←'Test-fn produced a result:',(⎕UCS 13),⎕SE.UCMD'Disp result'
+         rpt←'Test-fn produced a result:',(⎕UCS 13),⎕SE.Dyalog.Utils.disp result
      :EndIf
  :EndIf
  ⎕IO←⎕ML←1 ⋄ ⎕TRAP←0/⎕TRAP

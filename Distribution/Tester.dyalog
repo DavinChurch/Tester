@@ -164,7 +164,7 @@
  :If 0∊⍴rpt
      :Trap 0
          :If ~validate result
-             rpt←'Validation failed on result:',,(⎕UCS 13),⎕SE.UCMD'Disp result'
+             rpt←'Validation failed on result:',,(⎕UCS 13),⎕SE.Dyalog.Utils.disp result
          :EndIf
      :Else
          rpt←'Validation processing function failed to complete!',∊(⎕UCS 13),[1.5]⎕DM
@@ -230,7 +230,7 @@
  :Else
      ⎕IO←IO ⋄ ⎕ML←ML ⋄ result←left testfn right
      :If ~failure
-         rpt←'Test-fn produced a result:',(⎕UCS 13),⎕SE.UCMD'Disp result'
+         rpt←'Test-fn produced a result:',(⎕UCS 13),⎕SE.Dyalog.Utils.disp result
      :EndIf
  :EndIf
  ⎕IO←⎕ML←1 ⋄ ⎕TRAP←0/⎕TRAP
