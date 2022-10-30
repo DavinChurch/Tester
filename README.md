@@ -54,3 +54,4 @@ This means that `3 Plus 4` will pass the test if it returns `7` for a result.
 * A niladic function may be tested by enclosing it in a D-fn and passing a dummy right argument.
 * Since these routines are actually operators rather than functions, remember to use parentheses around the operator and its operands or use another mechanism to separate the operands from the tested function's arguments.
 * Also remember that when invoking operators, the right operand has short scope and probably needs to be enclosed in parentheses itself whenever an expression is being used as the right operand rather than a simple value.
+* The `⊢` function may be used with Pass to perform a simple value assertion test, such as in `(⊢Pass 7) 3+4`.
