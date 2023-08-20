@@ -27,6 +27,8 @@ These routines all respect the setting of an optional namespace-global variable 
 `2` | Stop in the tested function at the original error without any error trapping.
 `¯1` | Do not stop, and increment global variable "Errors" if it exists.
 
+This error handling is performed as described if an APL error occurs during execution of the test or if validation fails.
+
 ### Stopping during testing
 
 These routines also respect the setting of an optional namespace-global variable named `StopOnTest` which may be used to place a `⎕STOP` breakpoint in the code being tested.  It should consist of a simple character vector (or a nested vector of such vectors to specify several stop points) that contains the name of the testing function (e.g. `TestFoo`) that is calling one of the above routines (not the name of the function actually being tested), followed by the desired line number in square brackets.
