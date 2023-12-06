@@ -1,0 +1,21 @@
+ Test1;crash;noreturn;returnit;signal;StopOnError;none;returnsum
+⍝ Test the Tester code by using it to test itself!
+
+⍝ Keep local references of the sample functions to be tested
+ crash←Crash ⋄ noreturn←NoReturn ⋄ returnit←ReturnIt ⋄ signal←Signal ⋄ returnsum←ReturnSum
+ none←0 0⍴'' ⍝ Return value when tester validates
+
+ ⎕CS'#.Tester' ⍝ Run from within the namespace containing the test tools for more direct/obvious naming
+
+ StopOnError←0
+ ((returnit Pass 14)Pass none)14
+ ((returnit Pass 41)Pass{'Validation failed'≡17↑10↓⍵})14
+ ((noreturn Pass 14)Pass{'Test-fn did not return a result!'≡32↑10↓⍵})14
+ ((crash Pass 14)Pass{'SYNTAX ERROR'≡12↑10↓⍵})14
+ ((signal Pass 14)Pass{'Don''t do that'≡10↓⍵})14
+ 10((returnsum Pass 30)Pass none)20
+ 10((returnsum Pass 44)Pass{'Validation failed'≡17↑10↓⍵})20
+ ((noreturn Pass_{1})Pass none)14
+ ((noreturn Pass_{0})Pass {'Test-fn failed validation'≡25↑10↓⍵})14
+ ((crash Fail'SYNTAX ERROR')Pass{'SYNTAX ERROR'≡12↑10↓⍵})14
+ ((signal Fail'Don''t do that')Pass none)14

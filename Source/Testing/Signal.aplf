@@ -1,0 +1,2 @@
+ nothing←Signal arg
+ 'Don''t do that'⎕SIGNAL 555

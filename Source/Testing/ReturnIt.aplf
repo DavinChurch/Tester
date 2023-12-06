@@ -1,0 +1,2 @@
+ res←ReturnIt arg
+ res←arg

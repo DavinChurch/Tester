@@ -1,0 +1,2 @@
+ nothing←Crash arg
+ . ⍝ Simulate an unintentional bug-caused crash

@@ -1,0 +1,21 @@
+ Test3;crash;noreturn;returnit;signal;StopOnError;none;returnsum;Errors
+⍝ Test the Tester code by using it to test itself!
+
+⍝ Keep local references of the sample functions to be tested
+ crash←Crash ⋄ noreturn←NoReturn ⋄ returnit←ReturnIt ⋄ signal←Signal ⋄ returnsum←ReturnSum
+ none←0 0⍴'' ⍝ Return value when tester validates
+
+ ⎕CS'#.Tester' ⍝ Run from within the namespace containing the test tools for more direct/obvious naming
+
+ StopOnError←¯2 ⋄ Errors←''
+ ((returnit Pass 14)Pass{0=≢Errors})14
+ ((returnit Pass 41)Pass{(1=≢Errors)∧'Validation failed'≡17↑10↓⊃Errors})14
+ ((noreturn Pass 14)Pass{(2=≢Errors)∧'Test-fn did not return a result!'≡32↑10↓⊃1↓Errors})14
+ ((crash Pass 14)Pass{(3=≢Errors)∧'SYNTAX ERROR'≡12↑10↓⊃2↓Errors})14
+ ((signal Pass 14)Pass{(4=≢Errors)∧'Don''t do that'≡10↓⊃3↓Errors})14
+ 10((returnsum Pass 30)Pass{4=≢Errors})20
+ 10((returnsum Pass 44)Pass{(5=≢Errors)∧'Validation failed'≡17↑10↓⊃4↓Errors})20
+ ((noreturn Pass_{1})Pass{5=≢Errors})14
+ ((noreturn Pass_{0})Pass{(6=≢Errors)∧'Test-fn failed validation'≡25↑10↓⊃5↓Errors})14
+ ((crash Fail'SYNTAX ERROR')Pass{(7=≢Errors)∧'SYNTAX ERROR'≡12↑10↓⊃6↓Errors})14
+ ((signal Fail'Don''t do that')Pass{7=≢Errors})14
