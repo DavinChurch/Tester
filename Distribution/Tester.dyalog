@@ -1,18 +1,6 @@
 ﻿:Namespace Tester
 (⎕IO ⎕ML ⎕WX)←1 1 3
 
-∇ Errors←{stop}Test fns;∆wl;exp;nl3;⎕IO;⎕ML;IO;ML
-     ⍝∇ Provide zero or more names of testing fns to execute, in any structure, possibly including "*"s
-     
- IO←⎕IO ⋄ ML←⎕ML ⋄ ⎕IO←⎕ML←1 ⋄ :If 0=⎕NC'stop' ⋄ :If 0=⎕NC'StopOnError' ⋄ stop←1 ⋄ :Else ⋄ stop←StopOnError ⋄ :EndIf ⋄ :EndIf
- ⎕SHADOW'StopOnError' ⋄ StopOnError←stop ⍝ Provide local override for StopOnError
- nl3←(⎕NL ¯3)~1↑⎕SI ⋄ nl3←((1 ⎕AT nl3)∧.=0)/nl3 ⍝ Functions (local only) that can be called for testing
- ∆wl←{⍺←'' ⋄ (('[^ ',(∊{'\x{',(⎕D,⎕A)[1+⍉(8⍴16)⊤⎕UCS ⍵],'}'}¨,⍺),']+')⎕S'&'){1≥|≡⍵:,' ',⍕⍵ ⋄ ⊃,/∇¨(,⍵),⊂''}⍵} ⍝ Word-list decomposer
- exp←{(('\?'⎕R'.')('\*'⎕R'.*')('\.'⎕R'\\.')'^',⍵,'$')⎕S'&'⊢⍺} ⍝ Expand wild-carded names and restrict with ⎕NL
- fns←⊃,/(⊂nl3)exp¨' ,;'∆wl fns ⋄ Errors←0 ⋄ ⎕IO←IO ⋄ ⎕ML←ML ⋄ ⍎¨fns ⋄ ⎕IO←⎕ML←1 ⍝ Run each individual test function
- :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯1∊StopOnError ⋄ :Return ⋄ :EndIf ⋄ Errors←(⍕⍴fns),' tests completed'
-∇
-
 ∇ rpt←{left}(testfn Fail expect)right;at;result;validate;⎕TRAP;nrr;failure;⎕IO;IO;⎕ML;ML;stopon;stopoff
  ⍝ Perform a unit-test on a simple function call that takes arguments and returns a result.
  ⍝ Execute <testfn> with arguments {left} and <right> and expect it to ⎕SIGNAL an error
@@ -22,10 +10,12 @@
  ⍝ the error that was produced (where arguments provided are ⍺←⎕EN and ⍵←⊃⎕DM) and return
  ⍝ a 1 if the error was expected and 0 if not.
  ⍝ A global variable StopOnError may be set to any of the following values
- ⍝  0←Do not stop, just report invalid results
- ⍝  1←Stop in the testing function on the line that did not validate [Default]
- ⍝  2←Stop in the tested function at the original error without any error trapping
- ⍝  ¯1←Do not stop, and increment global variable "Errors" if it exists
+ ⍝  0←Do not stop, just report invalid results (by returning the report as an explicit result).
+ ⍝  1←Stop in the testing function on the line that did not validate. [Default]
+ ⍝  2←Stop in the tested function at any original coding error without any error trapping.
+ ⍝  ¯1←Do not stop, and increment (integer) global variable "Errors" if it exists.
+ ⍝  ¯2←Do not stop, and append the error report text to global variable "Errors" if it exists.
+ ⍝  ¯3←Do not stop, output the report directly to the session, and return a value of 1; otherwise return a 0.
  ⍝ See also ∇Pass/∇Pass_ to run tests that do not signal errors.
 
  IO←⎕IO ⋄ ML←⎕ML ⋄ ⎕IO←⎕ML←1 ⋄ rpt←0 0⍴'' ⋄ at←⊃⎕AT'testfn' ⋄ nrr←at[1]=0 ⋄ stopon←stopoff←⍬
@@ -80,7 +70,7 @@
          rpt←'Test-fn ran to completion without signalling an error!'
      :EndIf
  :ElseIf (⎕UCS 13)∊⊃⎕DM
-     rpt←1↓∊(⎕UCS 13),[1.5]⎕DM
+     rpt←1↓∊(⎕UCS 13),[1.5](~0,1↓{⍵∨¯1⌽⍵}∨/¨(⊂'left testfn right')⍷¨⎕DM)/⎕DM
  :Else
      result←⎕EN(⊃⎕DM)
  :EndIf
@@ -98,7 +88,12 @@
  :If ~0∊⍴rpt
      :If 0=⎕NC'StopOnError' ⋄ :OrIf 1∊StopOnError ⋄ rpt ⎕SIGNAL 500 ⋄ :EndIf
      rpt,⍨←(⊃1↓⎕LC){⍵,(×⍴⍵)/'[',(⍕⍺),']: '}' '~⍨⊃1↓⎕SI
-     :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯1∊StopOnError ⋄ :AndIf 2=⎕NC'Errors' ⋄ Errors+←1 ⋄ :EndIf
+     :If 2=⎕NC'StopOnError' ⋄ :AndIf ∨/¯1 ¯2∊StopOnError ⋄ :AndIf 2=⎕NC'Errors'
+         :Select StopOnError ⋄ :Case ¯1 ⋄ Errors+←1 ⋄ :Case ¯2 ⋄ Errors,←⊂rpt ⋄ :EndSelect
+     :EndIf
+ :EndIf
+ :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯3∊StopOnError
+     :If 0∊⍴rpt ⋄ rpt←0 ⋄ :Else ⋄ ⎕←rpt ⋄ rpt←1 ⋄ :EndIf
  :EndIf
 ∇
 
@@ -108,10 +103,12 @@
  ⍝ <expect> may be a data value to match (≡) or a niladic or monadic function to validate the
  ⍝ returned result (and return a 1 if OK, 0 if not).
  ⍝ A global variable StopOnError may be set to any of the following values
- ⍝  0←Do not stop, just report invalid results
- ⍝  1←Stop in the testing function on the line that did not validate [Default]
- ⍝  2←Stop in the tested function at the original error without any error trapping
- ⍝  ¯1←Do not stop, and increment global variable "Errors" if it exists
+ ⍝  0←Do not stop, just report invalid results (by returning the report as an explicit result).
+ ⍝  1←Stop in the testing function on the line that did not validate. [Default]
+ ⍝  2←Stop in the tested function at any original coding error without any error trapping.
+ ⍝  ¯1←Do not stop, and increment (integer) global variable "Errors" if it exists.
+ ⍝  ¯2←Do not stop, and append the error report text to global variable "Errors" if it exists.
+ ⍝  ¯3←Do not stop, output the report directly to the session, and return a value of 1; otherwise return a 0.
  ⍝ See also ∇Pass_ to run tests without expected result values
  ⍝ and ∇Fail to test production of ⎕SIGNAL error reports.
 
@@ -158,7 +155,7 @@
  :If failure∧(⎕EN=6)∧(~(⎕UCS 13)∊⊃⎕DM)∧∨/'left testfn right'⍷⊃1↓⎕DM
      rpt←'Test-fn did not return a result!'
  :ElseIf failure
-     rpt←1↓∊(⎕UCS 13),[1.5]⎕DM
+     rpt←1↓∊(⎕UCS 13),[1.5](~0,1↓{⍵∨¯1⌽⍵}∨/¨(⊂'left testfn right')⍷¨⎕DM)/⎕DM
  :EndIf
 
  :If 0∊⍴rpt
@@ -174,7 +171,12 @@
  :If ~0∊⍴rpt
      :If 0=⎕NC'StopOnError' ⋄ :OrIf 1∊StopOnError ⋄ rpt ⎕SIGNAL 500 ⋄ :EndIf
      rpt,⍨←(⊃1↓⎕LC){⍵,(×⍴⍵)/'[',(⍕⍺),']: '}' '~⍨⊃1↓⎕SI
-     :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯1∊StopOnError ⋄ :AndIf 2=⎕NC'Errors' ⋄ Errors+←1 ⋄ :EndIf
+     :If 2=⎕NC'StopOnError' ⋄ :AndIf ∨/¯1 ¯2∊StopOnError ⋄ :AndIf 2=⎕NC'Errors'
+         :Select StopOnError ⋄ :Case ¯1 ⋄ Errors+←1 ⋄ :Case ¯2 ⋄ Errors,←⊂rpt ⋄ :EndSelect
+     :EndIf
+ :EndIf
+ :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯3∊StopOnError
+     :If 0∊⍴rpt ⋄ rpt←0 ⋄ :Else ⋄ ⎕←rpt ⋄ rpt←1 ⋄ :EndIf
  :EndIf
 ∇
 
@@ -184,10 +186,12 @@
  ⍝ <expect> should be a function (passed ⍬ as any arguments) that validates
  ⍝ any side effects of the proper operation (and returns a 1 if OK, 0 if not).
  ⍝ A global variable StopOnError may be set to any of the following values
- ⍝  0←Do not stop, just report invalid results
- ⍝  1←Stop in the testing function on the line that did not validate [Default]
- ⍝  2←Stop in the tested function at the original error without any error trapping
- ⍝  ¯1←Do not stop, and increment global variable "Errors" if it exists
+ ⍝  0←Do not stop, just report invalid results (by returning the report as an explicit result).
+ ⍝  1←Stop in the testing function on the line that did not validate. [Default]
+ ⍝  2←Stop in the tested function at any original coding error without any error trapping.
+ ⍝  ¯1←Do not stop, and increment (integer) global variable "Errors" if it exists.
+ ⍝  ¯2←Do not stop, and append the error report text to global variable "Errors" if it exists.
+ ⍝  ¯3←Do not stop, output the report directly to the session, and return a value of 1; otherwise return a 0.
  ⍝ See also ∇Pass to run tests that return result values to be verified.
  ⍝ and ∇Fail to test production of ⎕SIGNAL error reports.
 
@@ -239,7 +243,7 @@
  :If failure∧(⎕EN=6)∧(~(⎕UCS 13)∊⊃⎕DM)∧∨/'left testfn right'⍷⊃1↓⎕DM
      result←⍬ ⍝ This is the expected case (a returned VALUE ERROR)
  :ElseIf failure
-     rpt←1↓∊(⎕UCS 13),[1.5]⎕DM
+     rpt←1↓∊(⎕UCS 13),[1.5](~0,1↓{⍵∨¯1⌽⍵}∨/¨(⊂'left testfn right')⍷¨⎕DM)/⎕DM
  :EndIf
 
  :If 0∊⍴rpt
@@ -255,7 +259,12 @@
  :If ~0∊⍴rpt
      :If 0=⎕NC'StopOnError' ⋄ :OrIf 1∊StopOnError ⋄ rpt ⎕SIGNAL 500 ⋄ :EndIf
      rpt,⍨←(⊃1↓⎕LC){⍵,(×⍴⍵)/'[',(⍕⍺),']: '}' '~⍨⊃1↓⎕SI
-     :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯1∊StopOnError ⋄ :AndIf 2=⎕NC'Errors' ⋄ Errors+←1 ⋄ :EndIf
+     :If 2=⎕NC'StopOnError' ⋄ :AndIf ∨/¯1 ¯2∊StopOnError ⋄ :AndIf 2=⎕NC'Errors'
+         :Select StopOnError ⋄ :Case ¯1 ⋄ Errors+←1 ⋄ :Case ¯2 ⋄ Errors,←⊂rpt ⋄ :EndSelect
+     :EndIf
+ :EndIf
+ :If 2=⎕NC'StopOnError' ⋄ :AndIf ¯3∊StopOnError
+     :If 0∊⍴rpt ⋄ rpt←0 ⋄ :Else ⋄ ⎕←rpt ⋄ rpt←1 ⋄ :EndIf
  :EndIf
 ∇
 
